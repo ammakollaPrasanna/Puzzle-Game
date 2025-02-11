@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Puzzle Game</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f0f0f0;
+    }
+    h1 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+    .puzzle-container {
+      display: grid;
+      gap: 2px;
+      border: 4px solid #333;
+      background-color: #fff;
+    }
+    .piece {
+      width: 100px;
+      height: 100px;
+      background-size: 300px 300px;
+      cursor: pointer;
+      border: 2px solid #333;
+      transition: transform 0.2s;
+    }
+    .piece:hover {
+      transform: scale(1.05);
+      border-color: #ff6600;
+    }
+    .hidden {
+      background-color: #ff6600;
+      background-image: none;
+    }
+    button {
+      margin: 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h1>Image Puzzle Game</h1>
+  <div>
+    <div id="puzzle" class="puzzle-container"></div>
+    <button id="shuffle">Shuffle</button>
+    <button id="reset">Reset</button>
+  </div>
+
+  <script>
+    const puzzleContainer = document.getElementById('puzzle');
+    const shuffleButton = document.getElementById('shuffle');
+    const resetButton = document.getElementById('reset');
+
+    const imageSrc = 'https://assets.onecompiler.app/435d6kqew/435dxwpe8/Screenshot%202025-01-07%20224332.png'; // Replace with your image URL
+    const gridSize = 3; // Number of rows and columns
+    const totalPieces = gridSize * gridSize;
+
+    let positions = [];
+    let initialPositions = [];
+
+    function createPuzzle() {
+      puzzleContainer.style.gridTemplateColumns = repeat(${gridSize}, 1fr);
+      puzzleContainer.style.gridTemplateRows = repeat(${gridSize}, 1fr);
+
+      positions = Array.from({ length: totalPieces }, (_, i) => i);
+      initialPositions = [...positions];
+
+      positions.forEach(index => {
+        const piece = document.createElement('div');
+        piece.classList.add('piece');
+        piece.style.backgroundImage = url(${imageSrc});
+        piece.style.backgroundPosition = `
+          ${-100 * (index % gridSize)}px 
+          ${-100 * Math.floor(index / gridSize)}px`;
+        piece.dataset.index = index;
+
+        if (index === totalPieces - 1) {
+          piece.classList.add('hidden');
+        }
+
+        piece.addEventListener('click', () => movePiece(index));
+
+        puzzleContainer.appendChild(piece);
+      });
+    }
+
+    function shufflePuzzle() {
+      positions.sort(() => Math.random() - 0.5);
+      updatePuzzle();
+    }
+
+    function resetPuzzle() {
+      positions = [...initialPositions];
+      updatePuzzle();
+    }
+
+    function updatePuzzle() {
+      const pieces = document.querySelectorAll('.piece');
+      pieces.forEach((piece, i) => {
+        const position = positions[i];
+        piece.style.order = position;
+      });
+    }
+
+    function movePiece(index) {
+      const emptyIndex = positions.indexOf(totalPieces - 1);
+      const row = Math.floor(index / gridSize);
+      const col = index % gridSize;
+      const emptyRow = Math.floor(emptyIndex / gridSize);
+      const emptyCol = emptyIndex % gridSize;
+
+      const isAdjacent =
+        (Math.abs(row - emptyRow) === 1 && col === emptyCol) ||
+        (Math.abs(col - emptyCol) === 1 && row === emptyRow);
+
+      if (isAdjacent) {
+        [positions[index], positions[emptyIndex]] = [positions[emptyIndex], positions[index]];
+        updatePuzzle();
+      }
+    }
+
+    shuffleButton.addEventListener('click', shufflePuzzle);
+    resetButton.addEventListener('click', resetPuzzle);
+
+    createPuzzle();
+  </script>
+</body>
+</html>
